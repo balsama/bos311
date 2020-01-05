@@ -113,13 +113,15 @@ class QueryBase
      *
      * @param int $i
      *   Starting number for the downloaded files filenames.
+     * @param string $path
+     * @param string $prefix
      */
-    public function downloadImages($i=1) {
+    public function downloadImages($i=1, $path = 'photos/', $prefix = 'photo-') {
         $count = count ($this->imageUrls);
         foreach ($this->imageUrls as $imageUrl) {
             echo 'Downloading image ' . "$i of $count" . ' from: ' . $imageUrl;
             $raw = file_get_contents($imageUrl);
-            file_put_contents('photos/photo-' . $i . '.jpg', $raw);
+            file_put_contents($path . $prefix . $i . '.jpg', $raw);
             echo " Done.\n";
             $i++;
         }
