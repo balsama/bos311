@@ -41,16 +41,34 @@ class QueryBase
      * That is, all words provided in the array must appear at least once in
      * the description.
      *
+     * @param $field string
+     *   The property of the record on which to search.
      * @param $searchTerms array
      *   The terms to search for in the description field.
+     * @param $exclude bool
+     *   Whether the filter should include or exclude records.
      */
-    public function filterRecordsByDescription($searchTerms = []) {
-        foreach ($this->active_filenames as $filename) {
-            $data = $this->loadFileJson($filename);
-            foreach ($data as $record) {
-                if (property_exists($record, 'description')) {
-                    if ($this->str_contains_all($record->description, $searchTerms)) {
-                        $this->matches[] = $record;
+    public function filterRecordsByFieldContains($field = 'description', $searchTerms = [], $exclude = false) {
+        $records = [];
+        if (empty($this->matches)) {
+            // First time this is run. load/use all active files
+            foreach ($this->active_filenames as $filename) {
+                $records = array_merge($records, $this->loadFileJson($filename));
+            }
+        }
+        else {
+            // We've already refined the list. We're just further refining now.
+            $records = array_merge($records, $this->matches);
+        }
+        $this->matches = [];
+        foreach ($records as $record) {
+            if (property_exists($record, $field)) {
+                if ($this->str_contains_all($record->$field, $searchTerms)) {
+                    if ($exclude) {
+                        unset($this->matches[$record->service_request_id]);
+                    }
+                    else {
+                        $this->matches[$record->service_request_id] = $record;
                     }
                 }
             }
