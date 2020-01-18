@@ -7,9 +7,9 @@ class QueryBase
     private $matches = [];
     private $imageUrls = [];
 
-    public function __construct($allowNonJson = false)
+    public function __construct($dataFolder = 'illegal-parking', $allowNonJson = false)
     {
-        $this->filenames = $this->findFilenames($allowNonJson);
+        $this->filenames = $this->findFilenames($dataFolder, $allowNonJson);
         $this->active_filenames = $this->filenames;
     }
 
@@ -47,33 +47,46 @@ class QueryBase
      *   The terms to search for in the description field.
      * @param $exclude bool
      *   Whether the filter should include or exclude records.
+     * @param $add bool
+     *   Whether to add new matches to an existing set of records.
      */
-    public function filterRecordsByFieldContains($field = 'description', $searchTerms = [], $exclude = false) {
+    public function filterRecordsByFieldContains($field = 'description', $searchTerms = [], $exclude = false, $add = false) {
         $records = [];
-        if (empty($this->matches)) {
-            // First time this is run. load/use all active files
-            foreach ($this->active_filenames as $filename) {
-                $records = array_merge($records, $this->loadFileJson($filename));
-            }
+
+        if (empty($this->matches) || $add) {
+            // First time this is run or if we want to scan all again, load/use
+            // all active files
+            $records = $this->getAllRecords();
         }
         else {
             // We've already refined the list. We're just further refining now.
             $records = array_merge($records, $this->matches);
         }
-        $this->matches = [];
+        $currentMatches = [];
         foreach ($records as $record) {
             if (property_exists($record, $field)) {
                 if ($this->str_contains_all($record->$field, $searchTerms)) {
                     if ($exclude) {
-                        unset($this->matches[$record->service_request_id]);
+                        unset($currentMatches[$record->service_request_id]);
                     }
                     else {
-                        $this->matches[$record->service_request_id] = $record;
+                        $currentMatches[$record->service_request_id] = $record;
                     }
                 }
             }
         }
+        $this->matches = array_merge($currentMatches, $this->matches);
         $this->matches = $this->dedupeMatches();
+    }
+
+    private function getAllRecords() {
+      $records = [];
+      foreach ($this->active_filenames as $filename) {
+        $foo = $this->loadFileJson($filename);
+        //$records = array_merge($records, $this->loadFileJson($filename));
+        $records = array_merge($records, $foo);
+      }
+      return $records;
     }
 
     /**
@@ -159,7 +172,7 @@ class QueryBase
 
     private function str_contains_all($haystack, array $needles) {
         foreach ($needles as $needle) {
-            if (strpos($haystack, $needle) === false) {
+            if (strpos(strtolower($haystack), strtolower($needle)) === false) {
                 return false;
             }
         }
@@ -171,8 +184,19 @@ class QueryBase
         return json_decode($contents);
     }
 
-    private function findFilenames($allowNonJson = false) {
-        $dir = 'data/';
+  /**
+   * @param string $folder
+   *   The name of the folder inside ./data/ which contains the responses to
+   *   search.
+   * @param bool $allowNonJson
+   *   Include non-json files in the results.
+   *
+   * @return string[]
+   *   An array of filenames with path.
+   *
+   */
+    private function findFilenames($folder, $allowNonJson = false) {
+        $dir = "data/$folder/";
         $filenames = array_diff(scandir($dir), ['..', '.', '.DS_Store']);
         foreach ($filenames as $key => $link) {
             if (is_dir($dir.$link)) {
@@ -184,7 +208,7 @@ class QueryBase
         }
         $fixedFilenames = [];
         foreach ($filenames as $filename) {
-            $fixedFilenames[] = 'data/' . $filename;
+            $fixedFilenames[] = "data/$folder/" . $filename;
         }
 
         return $fixedFilenames;
