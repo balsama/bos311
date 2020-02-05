@@ -2,17 +2,29 @@
 <?php
 include_once('src/QueryBase.php');
 
-$query = new QueryBase();
+$query = new QueryBase('sidewalk-not-shovelled');
 
-$query->setSourceFileNumber(2, 1);
+$query->filterRecordsByFieldContains('status', ['closed']);
 
-$query->filterRecordsByFieldContains('description', ['sidewalk']);
-$query->filterRecordsByFieldContains('description', ['scooter'], true);
-$query->filterRecordsByFieldContains('description', ['motorcycle'], true);
+function sortByArrayKey($keyA = 'open_date', $keyB = 'open_date')
+{
+    function cmp($a, $b)
+    {
+        return strcmp($a['open_date'], $b['open_date']);
+    }
+}
 
-$totalViolations = count($query->getMatches(['service_request_id']));
-$query->filterRecordsByFieldContains('status_notes', ['tagged']);
-$violationsTagged = count($query->getMatches(['service_request_id']));
-$percentTagged = ($violationsTagged / $totalViolations) * 100;
 
-print "Total violations: $totalViolations; Number tagged: $violationsTagged; Percentage tagged: $percentTagged";
+
+/**
+ * @param $fileName str
+ * @param $records array
+ */
+function writeToFile($fileName, $records)
+{
+    $fp = fopen($fileName . '.csv', 'w');
+    foreach ($records as $record) {
+        fputcsv($fp, $record);
+    }
+    fclose($fp);
+}
