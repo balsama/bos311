@@ -75,18 +75,13 @@ class QueryBase
                 }
             }
         }
-        $this->matches = array_merge($currentMatches, $this->matches);
+        if ($add) {
+            $this->matches = array_merge($currentMatches, $this->matches);
+        }
+        else {
+            $this->matches = $currentMatches;
+        }
         $this->matches = $this->dedupeMatches();
-    }
-
-    private function getAllRecords() {
-      $records = [];
-      foreach ($this->active_filenames as $filename) {
-        $foo = $this->loadFileJson($filename);
-        //$records = array_merge($records, $this->loadFileJson($filename));
-        $records = array_merge($records, $foo);
-      }
-      return $records;
     }
 
     /**
@@ -214,6 +209,15 @@ class QueryBase
         return $fixedFilenames;
     }
 
+    private function getAllRecords() {
+        $records = [];
+        foreach ($this->active_filenames as $filename) {
+            $newRecords = $this->loadFileJson($filename);
+            $records = array_merge($records, $newRecords);
+        }
+        return $records;
+    }
+
     private function filterjson($str) {
         if ($this->endsWith($str, '.json')) {
             return true;
@@ -221,8 +225,7 @@ class QueryBase
         return false;
     }
 
-    private function endsWith($haystack, $needle)
-    {
+    private function endsWith($haystack, $needle) {
         $length = strlen($needle);
         if ($length == 0) {
             return true;
@@ -261,6 +264,6 @@ class QueryBase
         $contents = str_replace('}{', '},{', $contents);
         $contents = str_replace(']]', ']', $contents);
 
-        file_put_contents($filename, $contents);
+        file_put_contents($filename . '.json', $contents);
     }
 }
