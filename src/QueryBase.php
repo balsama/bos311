@@ -7,6 +7,12 @@ class QueryBase
     private $matches = [];
     private $imageUrls = [];
 
+    /**
+     * QueryBase constructor.
+     * @param string $dataFolder
+     *   The folder within data that has the records your interested in.
+     * @param bool $allowNonJson
+     */
     public function __construct($dataFolder = 'illegal-parking', $allowNonJson = false)
     {
         $this->filenames = $this->findFilenames($dataFolder, $allowNonJson);
@@ -191,7 +197,7 @@ class QueryBase
    *
    */
     private function findFilenames($folder, $allowNonJson = false) {
-        $dir = "data/$folder/";
+        $dir = getcwd() . "/data/$folder/";
         $filenames = array_diff(scandir($dir), ['..', '.', '.DS_Store']);
         foreach ($filenames as $key => $link) {
             if (is_dir($dir.$link)) {
@@ -266,4 +272,68 @@ class QueryBase
 
         file_put_contents($filename . '.json', $contents);
     }
+
+    /**
+     * @param $time stdClass
+     * @return integer
+     */
+    public function getDaysOpen($time) {
+        $days = $time->diff->format('%a');
+        return (int) $days;
+    }
+
+    /**
+     * @param $match stdClass
+     *   An unfiltered match from QueryBase Class that has `requested_` and `updated_` datetimes properties.
+     * @return stdClass
+     * @throws Exception
+     */
+    public static function getTimesFromMatch($match) {
+        $open = new DateTime($match->requested_datetime);
+        $closed = new DateTime($match->updated_datetime);
+        $times = new stdClass();
+        $times->open = $open;
+        $times->closed = $closed;
+        $times->diff = self::getDiff($open, $closed);
+
+        return $times;
+    }
+
+    /**
+     * Difference in time between two DateTimes
+     *
+     * @param $open DateTime
+     * @param $closed DateTime
+     * @return DateInterval
+     */
+    public static function getDiff($open, $closed) {
+        $diff = $open->diff($closed);
+        return $diff;
+    }
+
+    /**
+     * @param $numbers int[]
+     * @return float|int
+     */
+    public static function getMeanAverage($numbers) {
+        $sum = array_sum($numbers);
+        $count = count($numbers);
+        $average = ($sum / $count);
+
+        return $average;
+    }
+
+    /**
+     * @param $fileName string
+     * @param $records array
+     */
+    public static function writeToCSVFile($fileName, $records)
+    {
+        $fp = fopen($fileName . '.csv', 'w');
+        foreach ($records as $record) {
+            fputcsv($fp, $record);
+        }
+        fclose($fp);
+    }
+
 }
