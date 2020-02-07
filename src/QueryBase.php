@@ -261,7 +261,7 @@ class QueryBase
         return true;
     }
 
-    public function fixJson($filename) {
+    public static function fixJson($filename) {
         $contents = '[' . file_get_contents($filename) . ']';
         $contents = str_replace('[[', '[', $contents);
         $contents = str_replace("},\n]", '}]', $contents);
@@ -269,8 +269,10 @@ class QueryBase
         $contents = str_replace('][', '', $contents);
         $contents = str_replace('}{', '},{', $contents);
         $contents = str_replace(']]', ']', $contents);
+        $contents = str_replace('][', ',', $contents);
+        $contents = str_replace('},{', "},\n{", $contents);
 
-        file_put_contents($filename . '.json', $contents);
+        file_put_contents($filename, $contents);
     }
 
     /**
@@ -334,6 +336,21 @@ class QueryBase
             fputcsv($fp, $record);
         }
         fclose($fp);
+    }
+
+    /**
+     * Extracts a number longer than 4 digits long from a string. Used to find duplicate case IDs.
+     *
+     * @param $status_note
+     * @return bool|mixed
+     */
+    public static function extractDupeId($status_note)
+    {
+        preg_match('/\d{4,20}/', $status_note, $matches);
+        if ($matches) {
+            return $matches[0];
+        }
+        return false;
     }
 
 }
