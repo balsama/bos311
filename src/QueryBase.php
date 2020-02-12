@@ -261,7 +261,7 @@ class QueryBase
         return true;
     }
 
-    public static function fixJson($filename) {
+    public static function fixJson($filename, $append = false) {
         $contents = '[' . file_get_contents($filename) . ']';
         $contents = str_replace('[[', '[', $contents);
         $contents = str_replace("},\n]", '}]', $contents);
@@ -272,6 +272,10 @@ class QueryBase
         $contents = str_replace('][', ',', $contents);
         $contents = str_replace('},{', "},\n{", $contents);
 
+        if ($append) {
+            file_put_contents($filename . $append, $contents);
+            return;
+        }
         file_put_contents($filename, $contents);
     }
 
