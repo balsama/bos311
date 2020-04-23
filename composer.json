@@ -1,0 +1,25 @@
+{
+    "name": "balsama/bos311",
+    "description": "Scraper and basic client for querying Boston 311 data",
+    "type": "project",
+    "require": {
+        "guzzlehttp/guzzle": "^6.5.3"
+    },
+    "require-dev": {
+        "php": "~7.4"
+    },
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Adam Balsam",
+            "email": "balsam.adam@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Balsama\\": "src"
+        }
+    }
+}

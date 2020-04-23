@@ -1,7 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-include_once 'src/QueryBase.php';
+require_once 'vendor/autoload.php';
+
+/**
+ * This creates a massive file. Use `split` to make it more manageble plus the fixJson method.
+ */
 
 $serviceCodes = [
     'New Tree Requests' => '4f38920fe75084437f0001a9',
@@ -31,14 +35,14 @@ $endpoint = 'https://mayors24.cityofboston.gov/open311/v2/requests.json?service_
 $filename = 'other.json';
 $i = 0;
 
-while ($i < 3035) {
-    $contents = file_get_contents($endpoint . $i);
+while ($i < 3155) {
+    $contents = Balsama\Helpers::fetch($endpoint . $i);
     file_put_contents($filename, $contents, FILE_APPEND);
     echo 'Done with request number ' . $i . "\n";
     if ($i % 10 == 0) {
-        QueryBase::fixJson($filename);
+        Balsama\Helpers::fixJson($filename);
     }
     $i++;
 }
 
-QueryBase::fixJson($filename);
+Balsama\Helpers::fixJson($filename);

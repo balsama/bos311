@@ -252,33 +252,6 @@ class QueryBase
         return $this->imageUrls;
     }
 
-    public function validateJson($filename) {
-        $contents = file_get_contents($filename);
-        $json = json_decode($contents);
-        if ($json === null) {
-            return false;
-        }
-        return true;
-    }
-
-    public static function fixJson($filename, $append = false) {
-        $contents = '[' . file_get_contents($filename) . ']';
-        $contents = str_replace('[[', '[', $contents);
-        $contents = str_replace("},\n]", '}]', $contents);
-        $contents = str_replace('],[', ',', $contents);
-        $contents = str_replace('][', '', $contents);
-        $contents = str_replace('}{', '},{', $contents);
-        $contents = str_replace(']]', ']', $contents);
-        $contents = str_replace('][', ',', $contents);
-        $contents = str_replace('},{', "},\n{", $contents);
-
-        if ($append) {
-            file_put_contents($filename . $append, $contents);
-            return;
-        }
-        file_put_contents($filename, $contents);
-    }
-
     /**
      * @param $time stdClass
      * @return integer
@@ -327,19 +300,6 @@ class QueryBase
         $average = ($sum / $count);
 
         return $average;
-    }
-
-    /**
-     * @param $fileName string
-     * @param $records array
-     */
-    public static function writeToCSVFile($fileName, $records)
-    {
-        $fp = fopen($fileName . '.csv', 'w');
-        foreach ($records as $record) {
-            fputcsv($fp, $record);
-        }
-        fclose($fp);
     }
 
     /**
