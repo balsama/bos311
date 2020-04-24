@@ -72,6 +72,10 @@ class QueryBase
         foreach ($records as $record) {
             if (property_exists($record, $field)) {
                 if ($this->str_contains_all($record->$field, $searchTerms)) {
+                    if (!property_exists($record, 'service_request_id')) {
+                        // WTF, some records don't have IDs?
+                        $record->service_request_id = sha1(time());
+                    }
                     if ($exclude) {
                         unset($currentMatches[$record->service_request_id]);
                     }

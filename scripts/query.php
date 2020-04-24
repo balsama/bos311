@@ -71,8 +71,11 @@ $monthCounts = [
 ];
 
 $terms = [
+    '!',
+    '!!',
     '!!!',
     '!!!!',
+    '!!!!!',
     'gathering',
     'drinking',
     'homeless',
