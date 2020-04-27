@@ -5,6 +5,7 @@ namespace Balsama;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\ServerException;
+use DateTime;
 
 class Helpers
 {
@@ -68,10 +69,24 @@ class Helpers
     public static function writeToCSVFile($fileName, $records)
     {
         $fp = fopen($fileName . '.csv', 'w');
-        foreach ($records as $month => $record) {
-            fputcsv($fp, [$month, $record]);
+        foreach ($records as $date => $record) {
+            fputcsv($fp, $record);
         }
         fclose($fp);
+    }
+
+    public static function arrayKeyDates($start, $end = 'now') {
+        // can use DateTime::createFromFormat() instead
+        $startDate = new DateTime($start);
+        $endDate = new DateTime($end);
+
+        $dates = [];
+        while($startDate <= $endDate) {
+            $dates[$startDate->format('Y-m-d')] = 0;
+            $startDate->modify('+1 day');
+        }
+
+        return $dates;
     }
 
 }

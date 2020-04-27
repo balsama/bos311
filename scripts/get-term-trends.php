@@ -84,6 +84,12 @@ $terms = [
     'mask',
     'home',
     'stay',
+    'fuck',
+    'mayor',
+    'demand',
+    'bird',
+    'dog',
+    'distancing',
 ];
 
 $termMonthCounts = [];
