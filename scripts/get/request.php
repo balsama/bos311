@@ -32,10 +32,10 @@ $serviceCodes = [
     'Other' => '4f38920fe75084437f0001a0',
 ];
 $endpoint = 'https://mayors24.cityofboston.gov/open311/v2/requests.json?service_code=' . $serviceCodes['Other'] . '&jurisdiction_id=boston.gov&page=';
-$filename = 'other.json';
+$filename = '25-apr-other-late.json';
 $i = 0;
 
-while ($i < 3155) {
+while ($i < 2) {
     $contents = Balsama\Helpers::fetch($endpoint . $i);
     file_put_contents($filename, $contents, FILE_APPEND);
     echo 'Done with request number ' . $i . "\n";
