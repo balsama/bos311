@@ -72,6 +72,10 @@ class QueryBase
         foreach ($records as $record) {
             if (property_exists($record, $field)) {
                 if ($this->str_contains_all($record->$field, $searchTerms)) {
+                    if (!property_exists($record, 'service_request_id')) {
+                        // WTF, some records don't have IDs?
+                        $record->service_request_id = sha1(time());
+                    }
                     if ($exclude) {
                         unset($currentMatches[$record->service_request_id]);
                     }
@@ -252,33 +256,6 @@ class QueryBase
         return $this->imageUrls;
     }
 
-    public function validateJson($filename) {
-        $contents = file_get_contents($filename);
-        $json = json_decode($contents);
-        if ($json === null) {
-            return false;
-        }
-        return true;
-    }
-
-    public static function fixJson($filename, $append = false) {
-        $contents = '[' . file_get_contents($filename) . ']';
-        $contents = str_replace('[[', '[', $contents);
-        $contents = str_replace("},\n]", '}]', $contents);
-        $contents = str_replace('],[', ',', $contents);
-        $contents = str_replace('][', '', $contents);
-        $contents = str_replace('}{', '},{', $contents);
-        $contents = str_replace(']]', ']', $contents);
-        $contents = str_replace('][', ',', $contents);
-        $contents = str_replace('},{', "},\n{", $contents);
-
-        if ($append) {
-            file_put_contents($filename . $append, $contents);
-            return;
-        }
-        file_put_contents($filename, $contents);
-    }
-
     /**
      * @param $time stdClass
      * @return integer
@@ -327,19 +304,6 @@ class QueryBase
         $average = ($sum / $count);
 
         return $average;
-    }
-
-    /**
-     * @param $fileName string
-     * @param $records array
-     */
-    public static function writeToCSVFile($fileName, $records)
-    {
-        $fp = fopen($fileName . '.csv', 'w');
-        foreach ($records as $record) {
-            fputcsv($fp, $record);
-        }
-        fclose($fp);
     }
 
     /**

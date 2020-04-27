@@ -1,5 +1,10 @@
 #!/usr/bin/env php
 <?php
+
+/**
+ * WIP. The spreadsheet is here: https://docs.google.com/spreadsheets/d/1YOnb7nKvXv_GsrAZrAsbOsEEFYlSfVzJw5FbJICSuvo/edit#gid=0 
+ */
+
 include_once('src/QueryBase.php');
 include_once('src/Helpers.php');
 
@@ -71,11 +76,8 @@ $monthCounts = [
 ];
 
 $terms = [
-    '!',
-    '!!',
     '!!!',
     '!!!!',
-    '!!!!!',
     'gathering',
     'drinking',
     'homeless',
